@@ -27,24 +27,25 @@ function wpdiet_install()
 register_activation_hook( __FILE__, 'wpdiet_install' );
 
 
-function test_upload_url() {
+function test_upload_url($args) {
 	$diet_options = get_option("wp_diet" );
 	if ($diet_options['active'] != 'on')
 		return;
 
-	if (!$diet_options['local_host'] || !$diet_options['site'] || !$diet_options['test_host'])
+	if (!$diet_options['local_host'] || !($diet_options['site'] || $diet_options['test_host']))
 		return;
 	if ($diet_options) {
 		$host = $_SERVER['HTTP_HOST'];
 		$local = $diet_options['local_host']?$diet_options['local_host']:'';
 		if(strstr($host, $diet_options['local_host']?$diet_options['local_host']:'')) {
 			$name = strtolower($diet_options['local_host']);
-			return "http://{$diet_options['site']}.{$diet_options['test_host']}/wp-content/uploads";
+			$args['baseurl'] =  "http://{$diet_options['site']}.{$diet_options['test_host']}/wp-content/uploads";
+			return $args;
 		}
 	}
 }
-
-add_filter( 'pre_option_upload_url_path', 'test_upload_url' );
+add_filter('upload_dir', 'test_upload_url');
+// add_filter( 'pre_option_upload_url_path', 'test_upload_url' );
 
 
 
